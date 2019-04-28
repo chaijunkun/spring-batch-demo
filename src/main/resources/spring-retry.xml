@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<!-- 失败重试模板 -->
+	<bean id="retryTemplate" class="org.springframework.retry.support.RetryTemplate">
+		<property name="retryPolicy">
+			<!-- 只要发现异常就重试的策略 -->
+			<bean id="retryPolicy" class="org.springframework.retry.policy.SimpleRetryPolicy">
+				<property name="maxAttempts" value="5" />
+			</bean>
+		</property>
+		<property name="backOffPolicy">
+			<!-- 重试补偿策略,失败后间隔预设毫秒后再次重试 -->
+			<bean id="backOffPolicy" class="org.springframework.retry.backoff.FixedBackOffPolicy">
+				<property name="backOffPeriod" value="1000" />
+			</bean>
+		</property>
+	</bean>
+</beans>

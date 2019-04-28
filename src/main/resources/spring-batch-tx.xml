@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<!-- 配置Spring Batch的任务持久层 -->
+	<bean id="jobDataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+		<property name="url" value="${job.db.conn}?useUnicode=true&amp;characterEncoding=${job.db.conn.encoding}"></property>
+		<property name="username" value="${job.db.conn.username}"></property>
+		<property name="password" value="${job.db.conn.password}"></property>
+		<property name="maxActive" value="${job.db.conn.pool.maxSize}" />
+		<property name="initialSize" value="${job.db.conn.pool.initialSize}"></property>
+		<property name="maxIdle" value="${job.db.conn.pool.maxIdle}" />
+		<property name="minIdle" value="2" />
+		<property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+	</bean>
+	<!-- Spring Batch中的事务管理器id最好名为transactionManager -->
+	<!-- 因为在step中配置的transaction-manager属性默认值为transactionManager -->
+	<!-- 配置成其他名称则需要每个步骤都要配这个属性,非常麻烦 -->
+	<!-- 同时注意不要和项目中其他访问数据库的事务管理器id冲突 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="jobDataSource" />
+	</bean>
+	<!-- 使用数据库级的任务仓库 -->
+	<bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
+		<property name="dataSource" ref="jobDataSource" />
+		<property name="transactionManager" ref="transactionManager" />
+		<property name="databaseType" value="MySQL" />
+	</bean>
+	<!-- 使用内存级的任务仓库 -->
+	<!-- <bean id="jobRepository" class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean" /> -->
+	<!-- 新建任务浏览器 -->
+<!-- 	<bean id="jobExplorer" class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean"> -->
+<!-- 		<property name="dataSource" ref="jobDataSource" /> -->
+<!-- 	</bean> -->
+</beans>

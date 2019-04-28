@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/batch
+           http://www.springframework.org/schema/batch/spring-batch.xsd">
+	<!-- 抽象步骤只起到配置声明的作用,不进行实例化 -->
+    <batch:step id="taskletJobBaseStep" abstract="true">
+    	<batch:listeners>
+    		<batch:listener ref="commonStepListener" />
+    	</batch:listeners>
+    </batch:step>
+	
+	<batch:job id="taskletJobDemo" restartable="true">
+		<batch:step id="stepMain" parent="taskletJobBaseStep">
+			<batch:tasklet>
+				<bean id="main" scope="step" class="com.github.chaijunkun.batch.steps.tasklet.StepMain">
+					<property name="retryTemplate" ref="retryTemplate" />
+				</bean>
+			</batch:tasklet>
+			<batch:next on="COMPLETED" to="stepBranch1" />
+			<batch:next on="FAILED" to="stepBranch2" />
+		</batch:step> 
+		<batch:step id="stepBranch1" parent="taskletJobBaseStep">
+			<batch:tasklet>
+				<bean id="branch1" scope="step" class="com.github.chaijunkun.batch.steps.tasklet.StepBranch1" />
+			</batch:tasklet>
+		</batch:step>
+		<batch:step id="stepBranch2" parent="taskletJobBaseStep">
+			<batch:tasklet>
+				<bean id="branch2" scope="step" class="com.github.chaijunkun.batch.steps.tasklet.StepBranch2" />
+			</batch:tasklet>
+		</batch:step>
+		<!-- 使用任务监听器 -->
+		<batch:listeners>
+			<batch:listener ref="commonJobListener" />
+		</batch:listeners>
+	</batch:job>
+</beans>

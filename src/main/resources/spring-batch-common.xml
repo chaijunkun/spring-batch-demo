@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="commonStepListener" class="com.github.chaijunkun.batch.base.CommonStepListener" />
+	<bean id="commonJobListener" class="com.github.chaijunkun.batch.base.CommonJobListener" />
+
+	<!-- 配置Spring Batch的job加载器 -->
+	<bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+		<property name="jobRepository" ref="jobRepository" />
+	</bean>
+	
+<!-- 	<bean id="jobOperator" class="org.springframework.batch.core.launch.support.SimpleJobOperator"> -->
+<!-- 		<property name="jobLauncher" ref="jobLauncher" /> -->
+<!-- 		<property name="jobExplorer" ref="jobExplorer" /> -->
+<!-- 		<property name="jobRepository" ref="jobRepository" /> -->
+<!-- 		<property name="jobRegistry"> -->
+<!-- 			<bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry" /> -->
+<!-- 		</property> -->
+<!-- 	</bean> -->
+</beans>

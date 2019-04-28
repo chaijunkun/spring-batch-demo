@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/batch
+           http://www.springframework.org/schema/batch/spring-batch.xsd">
+	<!-- 抽象步骤只起到配置声明的作用,不进行实例化 -->
+    <batch:step id="trunkJobBaseStep" abstract="true">
+    	<batch:listeners>
+    		<batch:listener ref="commonStepListener" />
+    	</batch:listeners>
+    </batch:step>
+	
+	<batch:job id="trunkJobDemo" restartable="true">
+		<batch:step id="stepProcessFile" parent="trunkJobBaseStep">
+			<batch:tasklet allow-start-if-complete="true" start-limit="3">
+				<batch:chunk commit-interval="1">
+					<!-- 规定如何去读-输入设备 -->
+					<batch:reader>
+						<bean id="dataReader" scope="step" class="com.github.chaijunkun.batch.steps.trunk.DataReader" />
+					</batch:reader>
+					<!-- 规定如何处理-运算器_控制器_存储器 -->
+					<batch:processor>
+						<bean id="orderProcessor" scope="step" class="com.github.chaijunkun.batch.steps.trunk.OrderProcessor" />
+					</batch:processor>
+					<!-- 规定如何去写-输出设备 -->
+					<batch:writer>
+						<bean id="dataWriter" scope="step" class="com.github.chaijunkun.batch.steps.trunk.DataWriter" />
+					</batch:writer>
+				</batch:chunk>
+			</batch:tasklet>
+			<batch:next on="COMPLETED" to="stepReportSuccess" />
+<!-- 			<batch:next on="FAILED" to="stepReportFailure" /> -->
+			<!-- 其他任何未预期的状态结束任务 -->
+<!-- 			<batch:end on="*"/> -->
+		</batch:step> 
+		<batch:step id="stepReportSuccess" parent="trunkJobBaseStep">
+			<batch:tasklet>
+				<bean id="reportSuccess" scope="step" class="com.github.chaijunkun.batch.steps.trunk.StepReportSuccess" />
+			</batch:tasklet>
+		</batch:step>
+<!-- 		<batch:step id="stepReportFailure" parent="trunkJobBaseStep"> -->
+<!-- 			<batch:tasklet> -->
+<!-- 				<bean id="reportFailure" scope="step" class="StepReportFailure" /> -->
+<!-- 			</batch:tasklet> -->
+<!-- 		</batch:step> -->
+		<!-- 使用任务监听器 -->
+		<batch:listeners>
+			<batch:listener ref="commonJobListener" />
+		</batch:listeners>
+	</batch:job>
+</beans>
